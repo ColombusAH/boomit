@@ -4,13 +4,21 @@ import { ValidationPipe } from '@nestjs/common';
 import { Logger } from 'nestjs-pino';
 import { ConfigService } from '@nestjs/config';
 import * as cookieParser from 'cookie-parser';
+import { Transport } from '@nestjs/microservices';
+import { JwtExceptionFilter } from './exception-filters';
 
 async function bootstrap() {
   const app = await NestFactory.create(AuthModule);
+  const configServie = app.get(ConfigService);
+  app.connectMicroservice({transport: Transport.TCP,options: {
+    host: '0.0.0.0',
+    port: configServie.get('TCP_PORT')
+  }})
+  app.useGlobalFilters(new JwtExceptionFilter());
   app.use(cookieParser());
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.useLogger(app.get(Logger));
-  const configServie = app.get(ConfigService);
-  await app.listen(configServie.get('PORT'));
+  await app.startAllMicroservices();
+  await app.listen(configServie.get('HTTP_PORT'));
 }
 bootstrap();

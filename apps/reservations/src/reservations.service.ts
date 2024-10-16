@@ -8,11 +8,11 @@ export class ReservationsService {
   constructor(
     private readonly reserverationsRepository: ReservationsRepository,
   ) {}
-  create(createReservationDto: CreateReservationDto) {
+  create(createReservationDto: CreateReservationDto, userId: string) {
     return this.reserverationsRepository.create({
       ...createReservationDto,
       timestamp: new Date(),
-      userId: '123',
+      userId,
     });
   }
 
@@ -22,15 +22,18 @@ export class ReservationsService {
 
   findOne(id: string) {
     return this.reserverationsRepository.findOne({
-      _id: id
-    })
+      _id: id,
+    });
   }
 
   update(_id: string, updateReservationDto: UpdateReservationDto) {
-    return this.reserverationsRepository.findOneAndUpdate({_id},{$set: updateReservationDto});
+    return this.reserverationsRepository.findOneAndUpdate(
+      { _id },
+      { $set: updateReservationDto },
+    );
   }
 
   remove(_id: string) {
-    return this.reserverationsRepository.findOneandDelete({_id});
+    return this.reserverationsRepository.findOneandDelete({ _id });
   }
 }
