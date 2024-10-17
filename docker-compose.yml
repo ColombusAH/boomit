@@ -18,6 +18,9 @@ services:
       context: .
       dockerfile: ./apps/reservations/Dockerfile
       target: development
+      args:
+        BUILD_ENV: development  # This sets the environment for the build stage
+        NODE_ENV: development   # This sets the runtime environment
     command: pnpm run start:dev
     env_file:
       - ./apps/reservations/.env
@@ -42,11 +45,25 @@ services:
       context: .
       dockerfile: ./apps/payments/Dockerfile
       target: development
+      args:
+        BUILD_ENV: development  # This sets the environment for the build stage
+        NODE_ENV: development   # This sets the runtime environment
     command: pnpm run start:dev payments
     env_file:
       - ./apps/payments/.env
-    ports:
-      - '3003:3003'
+    volumes:
+      - .:/usr/src/app
+  notifications:
+    build: 
+      context: .
+      dockerfile: ./apps/notifications/Dockerfile
+      target: development
+      args:
+        BUILD_ENV: development  # This sets the environment for the build stage
+        NODE_ENV: development   # This sets the runtime environment
+    command: pnpm run start:dev notifications
+    env_file:
+      - ./apps/notifications/.env
     volumes:
       - .:/usr/src/app
 
