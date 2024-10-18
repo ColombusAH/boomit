@@ -41,7 +41,7 @@ COPY pnpm-lock.yaml ./
 RUN npm install -g pnpm
 
 # Install only production dependencies
-RUN pnpm install --prod
+RUN pnpm install -r --prod
 
 # Copy the dist folder from the development stage
 COPY --from=development /usr/src/app/dist ./dist
