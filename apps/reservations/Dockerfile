@@ -16,10 +16,14 @@ COPY libs libs
 RUN pnpm install -r 
 
 # Build the application
-RUN pnpm run build reservations && echo "Build successful!" && ls -l /usr/src/app/dist
+RUN pnpm run build reservations && echo "Build successful!" && ls -l /usr/src/app/dist && ls -l /usr/src/app/dist/apps && ls -l /usr/src/app/dist/apps/reservations
 
 # Check if dist exists and is populated
 RUN ls -l /usr/src/app/dist
+
+RUN ls -l /usr/src/app/dist/apps
+
+RUN ls -l /usr/src/app/dist/apps/reservations/src
 
 # Production stage
 FROM node:alpine as production 
@@ -39,6 +43,6 @@ RUN pnpm install --prod
 COPY --from=development /usr/src/app/dist ./dist
 
 # Check if dist exists in the production stage
-RUN ls -l /usr/src/app/dist
+RUN ls -l /usr/src/app/dist/apps/reservations/src
 
-CMD [ "node", "dist/apps/reservations/main" ]
+CMD [ "node", "dist/apps/reservations/src/main" ]

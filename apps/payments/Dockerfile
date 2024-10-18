@@ -50,4 +50,4 @@ COPY --from=development /usr/src/app/dist ./dist
 RUN ls -l /usr/src/app/dist
 
 # Start the application
-CMD [ "node", "dist/apps/payments/main" ]
+CMD [ "node", "dist/apps/payments/src/main" ]

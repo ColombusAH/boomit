@@ -2,8 +2,8 @@
 FROM node:alpine AS development
 
 # Define a build-time argument for the environment, with a default value of 'development'
-ARG BUILD_ENV=development
-ENV NODE_ENV=${BUILD_ENV}
+# ARG BUILD_ENV=development
+# ENV NODE_ENV=${BUILD_ENV}
 
 WORKDIR /usr/src/app
 
@@ -54,4 +54,4 @@ COPY --from=development /usr/src/app/dist ./dist
 RUN ls -l /usr/src/app/dist
 
 # Define the command to run the application
-CMD ["node", "dist/apps/notifications/main"]
+CMD ["node", "dist/apps/notifications/src/main"]
