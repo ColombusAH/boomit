@@ -23,9 +23,10 @@ COPY libs libs
 RUN pnpm install -r 
 
 # Run the build command; BUILD_ENV can determine which configuration to use
-RUN pnpm run build notifications
+RUN pnpm run build notifications && echo "Build successful!" && ls -l /usr/src/app/dist
 
-COPY dist dist
+# Ensure the dist folder is created
+RUN ls -l /usr/src/app/dist
 
 # Stage 2: Create the production image
 FROM node:alpine AS production
@@ -48,6 +49,9 @@ RUN pnpm install --prod
 
 # Copy the build artifacts from the 'development' stage
 COPY --from=development /usr/src/app/dist ./dist
+
+# Ensure the dist folder exists in production stage
+RUN ls -l /usr/src/app/dist
 
 # Define the command to run the application
 CMD ["node", "dist/apps/notifications/main"]
