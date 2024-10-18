@@ -25,6 +25,8 @@ RUN pnpm install -r
 # Run the build command; BUILD_ENV can determine which configuration to use
 RUN pnpm run build notifications
 
+COPY dist ./dist
+
 # Stage 2: Create the production image
 FROM node:alpine AS production
 

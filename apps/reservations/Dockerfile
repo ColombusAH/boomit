@@ -16,6 +16,8 @@ RUN pnpm install -r
 
 RUN pnpm run build reservations
 
+COPY dist ./dist
+
 FROM node:alpine as production 
 
 ARG NODE_ENV=production

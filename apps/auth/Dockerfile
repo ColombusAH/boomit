@@ -17,6 +17,8 @@ RUN pnpm install -r
 
 RUN pnpm run build auth
 
+COPY dist ./dist
+
 FROM node:alpine as production 
 
 ARG NODE_ENV=production
