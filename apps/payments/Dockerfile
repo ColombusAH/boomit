@@ -16,7 +16,7 @@ RUN pnpm install -r
 
 RUN pnpm run build payments
 
-COPY dist ./dist
+COPY dist dist
 
 FROM node:alpine as production 
 
