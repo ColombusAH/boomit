@@ -4,14 +4,18 @@ WORKDIR /usr/src/app
 
 COPY package.json ./
 COPY pnpm-lock.yaml ./
+COPY tsconfig.json tsconfig.json
 
 RUN npm install -g pnpm
 
-RUN pnpm install
+COPY apps/auth apps/auth
+COPY libs libs
 
-COPY . .
+# Install dependencies, including devDependencies if needed
+RUN pnpm install -r 
 
-RUN pnpm run build
+
+RUN pnpm run build auth
 
 FROM node:alpine as production 
 

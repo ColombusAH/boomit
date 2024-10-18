@@ -10,18 +10,20 @@ WORKDIR /usr/src/app
 # Copy only the package files to leverage Docker's layer caching
 COPY package.json ./
 COPY pnpm-lock.yaml ./
+COPY tsconfig.json tsconfig.json
 
 # Install pnpm globally
 RUN npm install -g pnpm
 
-# Install dependencies, including devDependencies if needed
-RUN pnpm install
-
 # Copy the source code into the container
-COPY . .
+COPY apps/notifications apps/notifications
+COPY libs libs
+
+# Install dependencies, including devDependencies if needed
+RUN pnpm install -r 
 
 # Run the build command; BUILD_ENV can determine which configuration to use
-RUN pnpm run build
+RUN pnpm run build notifications
 
 # Stage 2: Create the production image
 FROM node:alpine AS production
