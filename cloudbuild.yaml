@@ -53,7 +53,7 @@ steps:
       'apps/notifications/Dockerfile',
       '.'
     ]
-    # Auth
+    # Auth 
   - name: 'gcr.io/cloud-builders/docker'
     args: [
       'build',
