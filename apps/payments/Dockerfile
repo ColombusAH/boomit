@@ -16,7 +16,8 @@ COPY apps/payments apps/payments
 COPY libs libs
 
 # Install all dependencies, including devDependencies
-RUN pnpm install -r 
+RUN pnpm install
+RUN cd apps/payments && pnpm i
 
 # Build the payments app and log the output
 RUN pnpm run build payments && echo "Build successful!" && ls -l /usr/src/app/dist
@@ -41,7 +42,7 @@ COPY pnpm-lock.yaml ./
 RUN npm install -g pnpm
 
 # Install only production dependencies
-RUN pnpm install -r --prod
+RUN pnpm install --prod
 
 # Copy the dist folder from the development stage
 COPY --from=development /usr/src/app/dist ./dist

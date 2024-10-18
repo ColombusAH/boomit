@@ -20,7 +20,8 @@ COPY apps/notifications apps/notifications
 COPY libs libs
 
 # Install dependencies, including devDependencies if needed
-RUN pnpm install -r 
+RUN pnpm install
+RUN cd apps/notifications && pnpm i
 
 # Run the build command; BUILD_ENV can determine which configuration to use
 RUN pnpm run build notifications && echo "Build successful!" && ls -l /usr/src/app/dist
@@ -45,7 +46,7 @@ COPY pnpm-lock.yaml ./
 RUN npm install -g pnpm
 
 # Install only production dependencies
-RUN pnpm install -r --prod
+RUN pnpm install --prod
 
 # Copy the build artifacts from the 'development' stage
 COPY --from=development /usr/src/app/dist ./dist

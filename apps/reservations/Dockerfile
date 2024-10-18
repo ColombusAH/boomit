@@ -13,7 +13,7 @@ COPY apps/reservations apps/reservations
 COPY libs libs
 
 # Install dependencies
-RUN pnpm install -r 
+RUN pnpm install
 
 # Build the application
 RUN pnpm run build reservations && echo "Build successful!" && ls -l /usr/src/app/dist && ls -l /usr/src/app/dist/apps && ls -l /usr/src/app/dist/apps/reservations

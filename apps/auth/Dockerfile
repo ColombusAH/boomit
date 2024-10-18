@@ -16,7 +16,8 @@ COPY apps/auth apps/auth
 COPY libs libs
 
 # Install all dependencies, including devDependencies
-RUN pnpm install -r 
+RUN pnpm install
+RUN cd apps/auth && pnpm i
 
 # Build the auth app and log the output
 RUN pnpm run build auth && echo "Build successful!" && ls -l /usr/src/app/dist
@@ -41,7 +42,7 @@ COPY pnpm-lock.yaml ./
 RUN npm install -g pnpm
 
 # Install only production dependencies
-RUN pnpm install -r --prod
+RUN pnpm install --prod
 
 # Copy the dist folder from the development stage
 COPY --from=development /usr/src/app/dist ./dist
