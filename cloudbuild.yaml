@@ -12,10 +12,7 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: [
       'push',
-      'us-east4-docker.pkg.dev/boomit-438919/reservations/production',
-      '-f',
-      'apps/reservations/Dockerfile',
-      '.'
+      'us-east4-docker.pkg.dev/boomit-438919/reservations/production'
     ]
     # Payments
   - name: 'gcr.io/cloud-builders/docker'
@@ -31,9 +28,6 @@ steps:
     args: [
       'push',
       'us-east4-docker.pkg.dev/boomit-438919/payments/production',
-      '-f',
-      'apps/payments/Dockerfile',
-      '.'
     ]
     # Notifications
   - name: 'gcr.io/cloud-builders/docker'
@@ -49,9 +43,6 @@ steps:
     args: [
       'push',
       'us-east4-docker.pkg.dev/boomit-438919/notifications/production',
-      '-f',
-      'apps/notifications/Dockerfile',
-      '.'
     ]
     # Auth
   - name: 'gcr.io/cloud-builders/docker'
@@ -66,10 +57,7 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: [
       'push',
-      'us-east4-docker.pkg.dev/boomit-438919/auth/production',
-      '-f',
-      'apps/auth/Dockerfile',
-      '.'
+      'us-east4-docker.pkg.dev/boomit-438919/auth/production'
     ]
 options:
   logging: CLOUD_LOGGING_ONLY
