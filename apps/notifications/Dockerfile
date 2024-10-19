@@ -19,7 +19,7 @@ FROM base as development
 COPY . .
 
 # Install all dependencies for building
-RUN pnpm install -r --offline
+RUN pnpm install -r
 
 # Build the notifications app
 RUN pnpm run build notifications && echo "Build successful!" && ls -l /usr/src/app/dist
