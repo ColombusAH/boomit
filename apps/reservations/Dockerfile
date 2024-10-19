@@ -48,8 +48,6 @@ COPY --from=development /usr/src/app/dist ./dist
 COPY --from=development /usr/src/app/node_modules ./node_modules
 # COPY --from=development /usr/src/app/apps/reservations/node_modules ./apps/reservations/
 
-# Check if everything exists as expected
-RUN ls -l /usr/src/app/dist/apps/reservations/src
 
 # Set environment variable
 ENV NODE_ENV=production
