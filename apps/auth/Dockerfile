@@ -1,54 +1,55 @@
-# Development stage
-FROM node:alpine as development
+# Base stage for fetching dependencies
+FROM node:alpine as base
 
 WORKDIR /usr/src/app
-
-# Copy package.json and pnpm lock file
-COPY package.json ./
-COPY pnpm-lock.yaml ./
-COPY tsconfig.json tsconfig.json
 
 # Install pnpm globally
 RUN npm install -g pnpm
 
-# Copy the auth app and libs
-COPY apps/auth apps/auth
-COPY libs libs
+# Copy the pnpm lockfile and package.json for efficient caching
+COPY package.json pnpm-lock.yaml ./
 
-# Install all dependencies, including devDependencies
-RUN pnpm install
-RUN cd apps/auth && pnpm i
+# Fetch dependencies to prepare for offline installation
+RUN pnpm fetch --prod
 
-# Build the auth app and log the output
+# Development stage for building the app
+FROM base as development
+
+# Copy all files into the container
+COPY . .
+
+# Install all dependencies for building
+RUN pnpm install -r --offline
+
+# Build the auth app
 RUN pnpm run build auth && echo "Build successful!" && ls -l /usr/src/app/dist
 
-# Ensure that the dist directory exists and is populated
-RUN ls -l /usr/src/app/dist
-
-# Production stage
-FROM node:alpine as production 
-
-# Set the environment variable for production
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
+# Production stage with production dependencies only
+FROM node:alpine as production
 
 WORKDIR /usr/src/app
 
-# Copy package.json and pnpm lock file for production dependencies
-COPY package.json ./
-COPY pnpm-lock.yaml ./
-
-# Install pnpm globally in the production image
+# Install pnpm globally
 RUN npm install -g pnpm
 
-# Install only production dependencies
-RUN pnpm install --prod
+# Copy pnpm lockfile and package.json for production installation
+COPY pnpm-lock.yaml package.json ./
 
-# Copy the dist folder from the development stage
+# Fetch production dependencies only
+RUN pnpm fetch --prod
+
+# Copy built assets from the development stage
 COPY --from=development /usr/src/app/dist ./dist
 
-# Ensure dist exists and is populated in the production stage
+# Copy node_modules for the inner auth project
+COPY --from=development /usr/src/app/node_modules ./node_modules
+COPY --from=development /usr/src/app/apps/auth/node_modules ./apps/auth/node_modules
+
+# Check if everything exists as expected
 RUN ls -l /usr/src/app/dist
 
+# Set environment variable
+ENV NODE_ENV=production
+
 # Start the application
-CMD [ "node", "dist/apps/auth/src/main" ]
+CMD [ "node", "dist/apps/auth/main" ]

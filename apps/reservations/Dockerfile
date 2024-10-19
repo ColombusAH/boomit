@@ -1,48 +1,58 @@
-# Development stage
-FROM node:alpine as development
+# Base stage for fetching dependencies
+FROM node:alpine as base
 
 WORKDIR /usr/src/app
 
-COPY package.json ./
-COPY pnpm-lock.yaml ./
-COPY tsconfig.json tsconfig.json
-
+# Install pnpm globally
 RUN npm install -g pnpm
 
-COPY apps/reservations apps/reservations
-COPY libs libs
+# Copy the pnpm lockfile and package.json for efficient caching
+COPY package.json pnpm-lock.yaml ./
 
-# Install dependencies
-RUN pnpm install
+# Fetch dependencies to prepare for offline installation
+RUN pnpm fetch --prod
 
-# Build the application
-RUN pnpm run build reservations && echo "Build successful!" && ls -l /usr/src/app/dist && ls -l /usr/src/app/dist/apps && ls -l /usr/src/app/dist/apps/reservations
+# Development stage for building the reservations app
+FROM base as development
 
-# Check if dist exists and is populated
-RUN ls -l /usr/src/app/dist
+# Copy all files into the container
+COPY . .
 
-RUN ls -l /usr/src/app/dist/apps
+# Install all dependencies for building
+RUN pnpm install -r --offline
 
-RUN ls -l /usr/src/app/dist/apps/reservations/src
+# Build the reservations app
+RUN pnpm run build reservations && echo "Build successful!" && \
+    ls -l /usr/src/app/dist && \
+    ls -l /usr/src/app/dist/apps && \
+    ls -l /usr/src/app/dist/apps/reservations
 
-# Production stage
-FROM node:alpine as production 
-
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
+# Production stage with production dependencies only
+FROM node:alpine as production
 
 WORKDIR /usr/src/app
 
-COPY package.json ./
-COPY pnpm-lock.yaml ./
-
+# Install pnpm globally in the production image
 RUN npm install -g pnpm
-RUN pnpm install --prod
 
-# Copy dist from the development stage
+# Copy pnpm lockfile and package.json for production installation
+COPY pnpm-lock.yaml package.json ./
+
+# Fetch production dependencies only
+RUN pnpm fetch --prod
+
+# Copy built assets from the development stage
 COPY --from=development /usr/src/app/dist ./dist
 
-# Check if dist exists in the production stage
+# Copy node_modules for the reservations project (if needed)
+COPY --from=development /usr/src/app/node_modules ./node_modules
+COPY --from=development /usr/src/app/apps/reservations/node_modules ./apps/reservations/node_modules
+
+# Check if everything exists as expected
 RUN ls -l /usr/src/app/dist/apps/reservations/src
 
-CMD [ "node", "dist/apps/reservations/src/main" ]
+# Set environment variable
+ENV NODE_ENV=production
+
+# Start the application
+CMD [ "node", "dist/apps/reservations/main" ]

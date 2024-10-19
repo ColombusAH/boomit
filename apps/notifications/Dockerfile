@@ -1,58 +1,55 @@
-# Stage 1: Build the application (with an environment parameter)
-FROM node:alpine AS development
-
-# Define a build-time argument for the environment, with a default value of 'development'
-# ARG BUILD_ENV=development
-# ENV NODE_ENV=${BUILD_ENV}
+# Base stage for fetching dependencies
+FROM node:alpine as base
 
 WORKDIR /usr/src/app
-
-# Copy only the package files to leverage Docker's layer caching
-COPY package.json ./
-COPY pnpm-lock.yaml ./
-COPY tsconfig.json tsconfig.json
 
 # Install pnpm globally
 RUN npm install -g pnpm
 
-# Copy the source code into the container
-COPY apps/notifications apps/notifications
-COPY libs libs
+# Copy the pnpm lockfile and package.json for efficient caching
+COPY package.json pnpm-lock.yaml ./
 
-# Install dependencies, including devDependencies if needed
-RUN pnpm install
-RUN cd apps/notifications && pnpm i
+# Fetch dependencies to prepare for offline installation
+RUN pnpm fetch --prod
 
-# Run the build command; BUILD_ENV can determine which configuration to use
+# Development stage for building the notifications app
+FROM base as development
+
+# Copy all files into the container
+COPY . .
+
+# Install all dependencies for building
+RUN pnpm install -r --offline
+
+# Build the notifications app
 RUN pnpm run build notifications && echo "Build successful!" && ls -l /usr/src/app/dist
 
-# Ensure the dist folder is created
-RUN ls -l /usr/src/app/dist
-
-# Stage 2: Create the production image
-FROM node:alpine AS production
-
-# Define a build-time argument for the environment, default is 'production'
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
+# Production stage with production dependencies only
+FROM node:alpine as production
 
 WORKDIR /usr/src/app
 
-# Copy only the package files
-COPY package.json ./
-COPY pnpm-lock.yaml ./
-
-# Install pnpm globally
+# Install pnpm globally in the production image
 RUN npm install -g pnpm
 
-# Install only production dependencies
-RUN pnpm install --prod
+# Copy pnpm lockfile and package.json for production installation
+COPY pnpm-lock.yaml package.json ./
 
-# Copy the build artifacts from the 'development' stage
+# Fetch production dependencies only
+RUN pnpm fetch --prod
+
+# Copy built assets from the development stage
 COPY --from=development /usr/src/app/dist ./dist
 
-# Ensure the dist folder exists in production stage
+# Copy node_modules for the notifications project (if needed)
+COPY --from=development /usr/src/app/node_modules ./node_modules
+COPY --from=development /usr/src/app/apps/notifications/node_modules ./apps/notifications/node_modules
+
+# Check if everything exists as expected
 RUN ls -l /usr/src/app/dist
 
-# Define the command to run the application
-CMD ["node", "dist/apps/notifications/src/main"]
+# Set environment variable
+ENV NODE_ENV=production
+
+# Start the application
+CMD ["node", "dist/apps/notifications/main"]
