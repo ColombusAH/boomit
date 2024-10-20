@@ -18,7 +18,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request | RpcRequest) =>
           (request as Request)?.cookies?.Authentication ||
-          (request as RpcRequest).Authentication,
+          (request as RpcRequest).Authentication ||
+          (request as Request).headers?.Authentication ||
+          (request as Request).headers?.authentication,
+        ,
       ]),
       secretOrKey: configServie.get<string>('JWT_SECRET'),
     });

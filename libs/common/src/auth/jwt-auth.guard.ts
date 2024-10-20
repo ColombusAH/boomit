@@ -16,14 +16,18 @@ export class JwtAuthGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    const jwt = context.switchToHttp().getRequest().cookies?.Authentication;
+    const jwt =
+      context.switchToHttp().getRequest().cookies?.Authentication ||
+      context.switchToHttp().getRequest().headers?.authentication;
     if (!jwt) {
       return false;
     }
-    return this.authClient.send<UserDto>('authenticate', { Authentication: jwt }).pipe(
-      tap((res) => (context.switchToHttp().getRequest().user = res)),
-      map((res) => !!res),
-      catchError(() => of(false))
-    );
+    return this.authClient
+      .send<UserDto>('authenticate', { Authentication: jwt })
+      .pipe(
+        tap((res) => (context.switchToHttp().getRequest().user = res)),
+        map((res) => !!res),
+        catchError(() => of(false)),
+      );
   }
 }

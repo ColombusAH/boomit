@@ -17,14 +17,13 @@ export class AuthController {
     @CurrentUser() user: UsersDocument,
     @Res({ passthrough: true }) response: Response,
   ) {
-    await this.authService.login(user, response);
-    response.send(user);
+    const jwt = await this.authService.login(user, response);
+    response.send(jwt);
   }
-
 
   @UseGuards(JwtAuthGuard)
   @MessagePattern('authenticate')
-  async authenticate(@Payload() data: any){
+  async authenticate(@Payload() data: any) {
     console.log(data);
     return data.user;
   }

@@ -11,7 +11,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  login(user: UsersDocument, response: Response<any, Record<string, any>>) {
+  async login(user: UsersDocument, response: Response<any, Record<string, any>>) {
     const tokenPayload = {
       userId: user._id.toHexString(),
     };
@@ -25,5 +25,6 @@ export class AuthService {
       httpOnly: true,
       expires,
     });
+    return token;
   }
 }
